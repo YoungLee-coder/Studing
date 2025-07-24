@@ -1,0 +1,25 @@
+site_name: Studing
+site_url: https://study.younglee.cn
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.sections
+    - navigation.path
+    - navigation.top
+
+nav:
+- 首页: "index.md"
+- 编程语言: 
+  - 前言: "编程语言/index.md"
+  - C: "编程语言/c.md"
+  - Java: "编程语言/Java.md"
+  - JavaScript: "编程语言/JavaScript.md"
+- AI Coding: 
+  - 前言: "AI Coding/index.md"
+- 高等数学: 
+  - 前言: "高等数学/index.md"
+  - 高等数学: "高等数学/高等数学.md"
+  - 线性代数: "高等数学/线性代数.md"
