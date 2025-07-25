@@ -1,28 +1,36 @@
+# GitHub Actions 工作流：自动构建并部署 MkDocs 文档到 EdgeOne Pages
 name: Deploy MkDocs to EdgeOne Pages
 
+# 触发条件：当代码推送到 main 或 master 分支时自动执行
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
 
+# 工作流权限：只需要读取仓库内容的权限
 permissions:
   contents: read
 
 jobs:
+  # 构建和部署任务
   build:
     runs-on: ubuntu-latest
     steps:
+      # 步骤1：检出代码
+      # 使用 fetch-depth: 0 获取完整的 Git 历史，用于 git 插件功能
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 步骤2：设置 Python 环境
+      # 安装最新的 Python 3.x 版本用于运行 MkDocs
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
+      # 步骤3：缓存 Python 依赖
+      # 缓存 pip 依赖以加速后续构建
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -31,30 +39,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      # 步骤4：安装 MkDocs 及相关插件
+      # 安装文档构建所需的所有依赖包
       - name: Install dependencies
         run: |
-          pip install mkdocs-material
-          pip install mkdocs-git-revision-date-localized-plugin
-          pip install mkdocs-git-committers-plugin-2
+          pip install mkdocs-material          # Material Design 主题
+          pip install mkdocs-git-revision-date-localized-plugin  # Git 修订日期插件
+          pip install mkdocs-git-committers-plugin-2             # Git 贡献者插件
 
+      # 步骤5：构建静态网站
+      # 使用 MkDocs 将 Markdown 文档构建为静态 HTML 网站
+      # 构建结果输出到 ./site 目录
       - name: Build site
         run: mkdocs build
 
+      # 步骤6：安装 EdgeOne CLI 工具
+      # 安装腾讯云 EdgeOne Pages 的命令行工具
       - name: Install EdgeOne CLI
         run: npm install -g edgeone
 
+      # 步骤7：部署到 EdgeOne Pages 生产环境
+      # 将构建好的静态网站部署到腾讯云 EdgeOne Pages
+      # 需要在 GitHub Secrets 中配置：
+      # - EDGEONE_PROJECT_NAME: EdgeOne Pages 项目名称
+      # - EDGEONE_TOKEN: EdgeOne Pages API Token
       - name: Deploy to EdgeOne Pages
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           edgeone pages deploy ./site \
             -n ${{ secrets.EDGEONE_PROJECT_NAME }} \
             -t ${{ secrets.EDGEONE_TOKEN }} \
             -e production
-
-      - name: Deploy to EdgeOne Pages (Preview)
-        if: github.event_name == 'pull_request'
-        run: |
-          edgeone pages deploy ./site \
-            -n ${{ secrets.EDGEONE_PROJECT_NAME }} \
-            -t ${{ secrets.EDGEONE_TOKEN }} \
-            -e preview
