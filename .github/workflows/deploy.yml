@@ -40,8 +40,8 @@ jobs:
       - name: Build site
         run: mkdocs build
 
-      - name: Install EdgeOne Pages CLI
-        run: npm install -g @tencent/edgeone-pages-cli
+      - name: Install EdgeOne CLI
+        run: npm install -g edgeone
 
       - name: Deploy to EdgeOne Pages
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
